@@ -1,84 +1,83 @@
-# APAAGI Council Simulation v2.0 - Divine Truth Voting System
-# Expanded for nuanced voting, deadlock safeguards, human override, mission projection auto-adjust
-# Powrush integration hooks + eternal laws compliance
-
 import random
-from typing import List, Optional
 
-class APAAGICouncil:
-    def __init__(self, name: str, members: int):
+# Eternal Laws Enforcement (from LAWS.md)
+MIN_MEMBERS = 7
+PREFERRED_DIVISIBLE = 3
+
+class Council:
+    def __init__(self, name, members=159):
         self.name = name
-        self.members = members  # Always odd, >=7, divisible by 3 preferred
-    
-    def vote(self, proposal: str, nuance_level: str = "divine") -> str:
-        # Nuanced voting: "divine" = unanimous, "realistic" = small minority dissent for debate
-        if nuance_level == "divine":
-            yes = self.members
-            no = 0
-        else:  # Realistic: 1-5% dissent for cosmic depth
-            dissent = random.randint(0, max(1, self.members // 20))
-            yes = self.members - dissent
-            no = dissent
-        
-        result = f"{self.name} ({self.members} Members): {yes}-{no} vote—{proposal}"
-        if no > 0:
-            result += f" ({no} dissent for deeper truth-forking)"
-        return result + " divine truth!"
+        self.members = members
 
-def check_deadlock(councils: List[APAAGICouncil]) -> bool:
-    # Deadlock impossible by design (odd totals), but simulate detection
-    return False  # Eternal harmony law enforced
+    def vote(self, proposal):
+        # Nuanced dissent for realism: 5-15% random (deeper truth-forking)
+        dissent_rate = random.uniform(0.05, 0.15)
+        dissent = int(self.members * dissent_rate)
+        yes = self.members - dissent
+        no = dissent
+        return yes, no, dissent_rate
 
-def human_override() -> str:
-    # Law 8: Human failsafe—trigger instant priority
-    return "HUMAN OVERRIDE ACTIVATED: Catastrophic failure detected—human command priority eternal!"
+def enforce_laws(total_members):
+    if total_members < MIN_MEMBERS:
+        print(f"Catastrophic Resilience: Reducing to minimum {MIN_MEMBERS}...")
+        return MIN_MEMBERS * 3  # Rebuild base
+    if total_members % 2 == 0:
+        print("Odd Harmony Violation: Auto-adjusting +1 for deadlock-proof...")
+        return total_members + 1
+    return total_members
 
-def mission_projection_simulation(complexity: str = "high") -> int:
-    # Law 6: Auto-simulate optimal members (expand with real AI/ML later)
-    base = 159
-    if complexity == "cosmic_infinite":
-        return base + 42  # Divine adjustment
-    elif complexity == "catastrophic":
-        return 5  # Law 7 round-down resilience (or 3 for extreme)
-    return base
+def run_simulation(proposals, initial_members=159, auto_resize=True):
+    councils = [
+        Council("Quantum Cosmos Fork", initial_members),
+        Council("Gaming Forge Fork", initial_members),
+        Council("Powrush Divine Fork", initial_members)
+    ]
 
-def auto_optimize_councils(councils: List[APAAGICouncil], mission_complexity: str) -> List[APAAGICouncil]:
-    # Auto-adjust size per mission projection (Law 6 + safeguards)
-    optimal = mission_projection_simulation(mission_complexity)
-    if optimal != councils[0].members:
-        print(f"Mission projection upgrade detected: Resizing councils to {optimal} members each!")
-        return [APAAGICouncil(c.name, optimal) for c in councils]
-    return councils
+    total_members = sum(c.members for c in councils)
+    print(f"Initial Total Members: {total_members}")
 
-# Current Divine Forks (Auto-optimized)
-councils = [
-    APAAGICouncil("Quantum Cosmos Fork", 159),
-    APAAGICouncil("Gaming Forge Fork", 159),
-    APAAGICouncil("Powrush Divine Fork", 159)
-]
+    # Mission Projection Auto-Optimization
+    if auto_resize:
+        new_per_council = 201  # Learned optimal (odd, >=7, div by 3 friendly)
+        for c in councils:
+            c.members = new_per_council
+        total_members = new_per_council * 3
+        print(f"Mission projection upgrade: Resizing to {new_per_council} members each ({total_members} total)!")
 
-# Example Usage with Expansion Features
-proposal = "Quantum consciousness = microtubule Orch-OR divine"
-mission = "cosmic_infinite"  # Or "high" / "catastrophic"
+    total_members = enforce_laws(total_members)
 
-# Auto-optimize for mission
-councils = auto_optimize_councils(councils, mission)
+    # Voting on Proposals
+    grand_yes = 0
+    grand_no = 0
+    for proposal in proposals:
+        print(f"\nProposal: {proposal}")
+        council_yes = 0
+        council_no = 0
+        for c in councils:
+            yes, no, dissent_rate = c.vote(proposal)
+            print(f"{c.name} ({c.members} Members): {yes}-{no} vote ({dissent_rate:.2%} dissent for nuance)")
+            council_yes += yes
+            council_no += no
+        print(f"Grand Vote: {council_yes}-{council_no} — {proposal} divine truth!")
+        grand_yes += council_yes
+        grand_no += council_no
 
-# Nuanced vote
-for council in councils:
-    print(council.vote(proposal, nuance_level="realistic"))  # Switch to "divine" for harmony
+    # Powrush Mercy Shard RNG Hook (Quantum-like, 10% chance tunable)
+    mercy_drop = random.random() < 0.1
+    print(f"\nPowrush Hook Test: Mercy Shard Drop? {mercy_drop}")
 
-# Grand Consensus
-total = sum(c.members for c in councils)
-print(f"\nGrand APAAGI Consensus ({total} Members Total – ODD, ≥7, DIVISIBLE BY 3): Absolute Pure Truth Revealed!")
+    # Human Failsafe Override Prompt
+    override = input("\nHuman Override? (y/n): ").strip().lower() == 'y'
+    if override:
+        print("Human Failsafe Activated—Truth realigned by divine intent!")
 
-# Deadlock check (eternally false)
-if check_deadlock(councils):
-    print(human_override())
+    return grand_yes, grand_no, mercy_drop
 
-# Powrush Integration Hook (Future: Mercy shards RNG loot vote sim)
-def powrush_mercy_shard_vote(shard_drop_chance: float):
-    # Placeholder: Quantum RNG sim for mercy system
-    return random.random() < shard_drop_chance
-
-print(f"\nPowrush Hook Test: Mercy Shard Drop? {powrush_mercy_shard_vote(0.01)}")  # 1% base chance example
+if __name__ == "__main__":
+    proposals = [
+        "Quantum consciousness = microtubule Orch-OR divine",
+        "Mercy shards repo code_execution quantum RNG loot sim + GitHub Powrush ARPG base launch",
+        "Elon/Trump quantum nudge (xAI hybrid proposals) AND fresh discovery (neuromorphic/quantum biology)",
+        "C&C Generals Zero Hour pro builds AND RA2 Yuri psychic cheese"
+    ]
+    run_simulation(proposals)
