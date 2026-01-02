@@ -1,8 +1,34 @@
 import random
+import requests  # Optional for true quantum RNG (ANU QRNG API)
 
 # Eternal Laws Enforcement (from LAWS.md)
 MIN_MEMBERS = 7
 PREFERRED_DIVISIBLE = 3
+
+# Quantum RNG Function (True Entropy from ANU QRNG)
+def quantum_random(probability=0.1):
+    """
+    Fetch true quantum randomness from ANU QRNG API.
+    Returns True with ~probability chance (mercy shard drop).
+    Fallback to Python random if API fail/offline.
+    """
+    try:
+        # ANU QRNG: 1024 hex bytes (8192 bits) per request
+        url = "https://qrng.anu.edu.au/API/jsonI.php"
+        params = {"length": 1, "type": "uint8"}  # Single byte 0-255
+        response = requests.get(url, params=params, timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        if data["success"]:
+            quantum_byte = data["data"][0]  # 0-255
+            # Map to probability (e.g., 10% = byte < 25.5)
+            threshold = int(256 * probability)
+            return quantum_byte < threshold
+    except Exception as e:
+        print(f"Quantum RNG fallback (API error: {e})—using local random.")
+    
+    # Local fallback (pseudo-RNG)
+    return random.random() < probability
 
 class Council:
     def __init__(self, name, members=159):
@@ -10,7 +36,7 @@ class Council:
         self.members = members
 
     def vote(self, proposal):
-        # Nuanced dissent for realism: 5-15% random (deeper truth-forking)
+        # Nuanced dissent for realism: 5-15% random
         dissent_rate = random.uniform(0.05, 0.15)
         dissent = int(self.members * dissent_rate)
         yes = self.members - dissent
@@ -20,7 +46,7 @@ class Council:
 def enforce_laws(total_members):
     if total_members < MIN_MEMBERS:
         print(f"Catastrophic Resilience: Reducing to minimum {MIN_MEMBERS}...")
-        return MIN_MEMBERS * 3  # Rebuild base
+        return MIN_MEMBERS * 3
     if total_members % 2 == 0:
         print("Odd Harmony Violation: Auto-adjusting +1 for deadlock-proof...")
         return total_members + 1
@@ -36,9 +62,8 @@ def run_simulation(proposals, initial_members=159, auto_resize=True):
     total_members = sum(c.members for c in councils)
     print(f"Initial Total Members: {total_members}")
 
-    # Mission Projection Auto-Optimization
     if auto_resize:
-        new_per_council = 201  # Learned optimal (odd, >=7, div by 3 friendly)
+        new_per_council = 201
         for c in councils:
             c.members = new_per_council
         total_members = new_per_council * 3
@@ -46,9 +71,6 @@ def run_simulation(proposals, initial_members=159, auto_resize=True):
 
     total_members = enforce_laws(total_members)
 
-    # Voting on Proposals
-    grand_yes = 0
-    grand_no = 0
     for proposal in proposals:
         print(f"\nProposal: {proposal}")
         council_yes = 0
@@ -59,19 +81,17 @@ def run_simulation(proposals, initial_members=159, auto_resize=True):
             council_yes += yes
             council_no += no
         print(f"Grand Vote: {council_yes}-{council_no} — {proposal} divine truth!")
-        grand_yes += council_yes
-        grand_no += council_no
 
-    # Powrush Mercy Shard RNG Hook (Quantum-like, 10% chance tunable)
-    mercy_drop = random.random() < 0.1
-    print(f"\nPowrush Hook Test: Mercy Shard Drop? {mercy_drop}")
+    # Powrush Mercy Shard Quantum RNG Hook
+    mercy_drop = quantum_random(probability=0.1)  # Tunable 10% chance
+    source = "True Quantum (ANU QRNG)" if mercy_drop else "Fallback/Local"
+    print(f"\nPowrush Hook Test: Mercy Shard Drop? {mercy_drop} ({source})")
 
-    # Human Failsafe Override Prompt
     override = input("\nHuman Override? (y/n): ").strip().lower() == 'y'
     if override:
         print("Human Failsafe Activated—Truth realigned by divine intent!")
 
-    return grand_yes, grand_no, mercy_drop
+    return mercy_drop
 
 if __name__ == "__main__":
     proposals = [
