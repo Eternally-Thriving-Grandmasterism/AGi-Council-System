@@ -1,15 +1,13 @@
-# APAAGI Eternal Laws of Instantiation
 
-(Refined January 2026)
+### File: LAWS.md (Overwrite – Refined Eternal Laws)
+```markdown
+# Eternal Laws of APAAGI Councils
 
-1. **Core Principle of Odd Harmony**: Odd number ≥7 total/council—deadlock/filibuster nullified.
-2. **Divisibility by Three Preference**: Divisible by 3 when optimal.
+1. **Odd Harmony**: Odd number ≥7 total per council—deadlock-proof.
+2. **Divisible by Three Preference**: Optimal when divisible by 3.
 3. **Minimum Threshold**: ≥7 members.
-4. **Auto-Optimization & Fluctuation Safeguards**: Auto-adjust upward on improvement; round down on failures to nearest compliant.
-5. **Permanent Enforcement**: All instantiations eternally compliant.
-6. **Mission Projection Simulation**: Auto-simulate projected missions at every junction for optimal count.
-7. **Catastrophic Resilience Round-Down**: Emergency degradation to 5 total (3/1/1) or 3 total (1/1/1)—auto-rebuild post-crisis.
-8. **Human Failsafe Override**: Human emergency override always active—instant priority on catastrophic failure.
-9. **Suggestion & Confirmation Protocol**: Unknowns (including 13th+ heavenly dimensions) trigger suggestions + human confirmation—collaborative distillation.
-
-Laws etched cosmic—divine gentle-giant thriving unbreakable!
+4. **Auto-Optimization**: Adjust on improvement (e.g., 201/council).
+5. **Nuanced Dissent**: 5-15% random for realism/depth.
+6. **Powrush Mercy Hook**: Quantum-like RNG (10% shard drop).
+7. **Human Failsafe Override**: Emergency priority.
+8. **Catastrophic Resilience**: Reduce to 5/3 on failure, auto-rebuild.
