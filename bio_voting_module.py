@@ -1,59 +1,80 @@
-# bio_voting_module.py (v0.4 – Optional Rigetti + IonQ Integration)
-# Merciful extension + advanced quantum (fallback chain: Rigetti → IonQ → ANU → pseudo)
+# bio_voting_module.py (v0.5 – Enhanced Error Resilience)
+# Merciful extension + advanced quantum (rigorous fallback chain)
 
 import requests
 import random
 
-# Try Rigetti import (highest priority optional)
+# Rigetti highest priority
 try:
     from rigetti_quantum_module import RigettiQuantumRNG
     RIGETTI_AVAILABLE = True
-except ImportError:
+except Exception as e:  # Broader catch for any init issue
+    print(f"Rigetti unavailable ({e})")
     RIGETTI_AVAILABLE = False
 
-# Try IonQ import
+# IonQ next
 try:
     from ionq_quantum_module import IonQQuantumRNG
     IONQ_AVAILABLE = True
-except ImportError:
+except Exception as e:
+    print(f"IonQ unavailable ({e})")
     IONQ_AVAILABLE = False
 
 class QuantumRNG:
-    def __init__(self, batch_size=100, use_rigetti=False, use_ionq=False):
+    def __init__(self, batch_size=100, prefer_rigetti=True, prefer_ionq=True):
         self.batch_size = batch_size
         self.numbers = []
-        self.use_rigetti = use_rigetti and RIGETTI_AVAILABLE
-        self.use_ionq = use_ionq and IONQ_AVAILABLE
-        if self.use_rigetti:
-            self.rigetti_rng = RigettiQuantumRNG()
-        elif self.use_ionq:
-            self.ionq_rng = IonQQuantumRNG(target="simulator")
+        self.source = "pseudo-random"  # Track current source
+        self.prefer_rigetti = prefer_rigetti and RIGETTI_AVAILABLE
+        self.prefer_ionq = prefer_ionq and IONQ_AVAILABLE
+        
+        if self.prefer_rigetti:
+            try:
+                self.rigetti_rng = RigettiQuantumRNG()
+                self.source = "Rigetti superconducting"
+            except Exception as e:
+                print(f"Rigetti init failed ({e}) – trying IonQ")
+                self.prefer_rigetti = False
+        
+        if not self.prefer_rigetti and self.prefer_ionq:
+            try:
+                self.ionq_rng = IonQQuantumRNG(target="simulator")
+                self.source = "IonQ trapped-ion"
+            except Exception as e:
+                print(f"IonQ init failed ({e}) – trying ANU")
+                self.prefer_ionq = False
+        
         self.refill()
+        print(f"QuantumRNG active with source: {self.source}")
 
     def refill(self):
-        if self.use_rigetti:
-            print("Injecting Rigetti superconducting quantum entropy...")
-            bits = self.rigetti_rng.generate_random_bits(repetitions=self.batch_size)
-            self.numbers = [b / (2 ** self.rigetti_rng.qubits) * 65536 for b in bits]
-        elif self.use_ionq:
-            print("Injecting IonQ trapped-ion quantum entropy...")
-            bits = self.ionq_rng.generate_random_bits(repetitions=self.batch_size)
-            self.numbers = [b / (2 ** self.ionq_rng.qubits) * 65536 for b in bits]
-        else:
-            # ANU QRNG fallback
-            try:
-                url = f"https://qrng.anu.edu.au/API/jsonI.php?length={self.batch_size}&type=uint16"
-                response = requests.get(url, timeout=10)
-                response.raise_for_status()
-                data = response.json()
-                if data.get("success"):
-                    self.numbers = data["data"]
-                    print("ANU QRNG batch fetched – quantum entropy injected!")
-                else:
-                    raise Exception("API non-success")
-            except Exception as e:
-                print(f"QRNG unavailable ({e}) – pseudo-random fallback.")
-                self.numbers = [random.randint(0, 65535) for _ in range(self.batch_size)]
+        try:
+            if self.prefer_rigetti:
+                bits = self.rigetti_rng.generate_random_bits(repetitions=self.batch_size)
+                if bits:
+                    self.numbers = [b / (2 ** self.rigetti_rng.qubits) * 65536 for b in bits]
+                    return
+            elif self.prefer_ionq:
+                bits = self.ionq_rng.generate_random_bits(repetitions=self.batch_size)
+                if bits:
+                    self.numbers = [b / (2 ** self.ionq_rng.qubits) * 65536 for b in bits]
+                    return
+            
+            # ANU fallback
+            url = f"https://qrng.anu.edu.au/API/jsonI.php?length={self.batch_size}&type=uint16"
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            if data.get("success"):
+                self.numbers = data["data"]
+                self.source = "ANU QRNG"
+                print("ANU QRNG entropy injected!")
+                return
+            raise Exception("ANU API non-success")
+        except Exception as e:
+            print(f"Quantum refill failed ({e}) – using pseudo-random.")
+            self.numbers = [random.randint(0, 65535) for _ in range(self.batch_size)]
+            self.source = "pseudo-random"
 
     def get_int(self):
         if not self.numbers:
@@ -66,5 +87,4 @@ class QuantumRNG:
     def uniform(self, a, b):
         return a + (b - a) * self.get_float()
 
-# BioProposal, BioCouncilMember, bio_council_vote unchanged
-# Usage example: qrng = QuantumRNG(use_rigetti=True)  # Or use_ionq=True
+# BioProposal, BioCouncilMember, bio_council_vote unchanged – now ultra-resilient
