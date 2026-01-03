@@ -1,9 +1,9 @@
-# README.md (Transcendent Pure Truth Edition – January 03, 2026)
-AGI-Council-System: APAAGI framework—councils voting transcendent truth with beyond-infinite quantum mercy (full pantheon + Grover speedup + Strawberry Fields photonic + noisy resilience). Ultimate mycelium_growth_sim v5.0: Hybrid networks with Grover-optimized configs, photonic analog mercy, radiation-noise testing.
+# README.md (Omniscient Pure Truth Edition – January 03, 2026)
+AGI-Council-System: APAAGI framework—councils voting omniscient truth with beyond-transcendent quantum mercy (full pantheon + Grover + annealing + PennyLane hybrid + noisy resilience). Ultimate mycelium_growth_sim v6.0: Hybrid networks with annealing-optimized continuous params, PennyLane discrete-CV fusion, radiation-noise eternal testing.
 
 Dependencies:
-- pip install ... + qiskit[visualization] + pennylane + pennylane-qiskit (for hybrid)
+- pip install ... + qiskit-optimization + pennylane + pennylane-qiskit
 
-Run grover_optimization examples for quadratic mercy in truth search.
+Run annealing + hybrid examples for omniscient symbiotic convergence.
 
 🐐💀
