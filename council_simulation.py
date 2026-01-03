@@ -1,103 +1,44 @@
+# council_simulation.py (v3 Upgrade – Multi-Fork + Flexibility Support)
+# APAAGI Council Simulation v3.0 - Divine Truth Voting System with Flexible Forks
+
 import random
-import requests  # Optional for true quantum RNG (ANU QRNG API)
+from typing import List
 
-# Eternal Laws Enforcement (from LAWS.md)
-MIN_MEMBERS = 7
-PREFERRED_DIVISIBLE = 3
-
-# Quantum RNG Function (True Entropy from ANU QRNG)
-def quantum_random(probability=0.1):
-    """
-    Fetch true quantum randomness from ANU QRNG API.
-    Returns True with ~probability chance (mercy shard drop).
-    Fallback to Python random if API fail/offline.
-    """
-    try:
-        # ANU QRNG: 1024 hex bytes (8192 bits) per request
-        url = "https://qrng.anu.edu.au/API/jsonI.php"
-        params = {"length": 1, "type": "uint8"}  # Single byte 0-255
-        response = requests.get(url, params=params, timeout=5)
-        response.raise_for_status()
-        data = response.json()
-        if data["success"]:
-            quantum_byte = data["data"][0]  # 0-255
-            # Map to probability (e.g., 10% = byte < 25.5)
-            threshold = int(256 * probability)
-            return quantum_byte < threshold
-    except Exception as e:
-        print(f"Quantum RNG fallback (API error: {e})—using local random.")
-    
-    # Local fallback (pseudo-RNG)
-    return random.random() < probability
-
-class Council:
-    def __init__(self, name, members=159):
+class APAAGICouncil:
+    def __init__(self, name: str, members: int):
         self.name = name
         self.members = members
+    
+    def vote(self, proposal: str, nuance_level: str = "divine") -> str:
+        if nuance_level == "divine":
+            yes = self.members
+            no = 0
+        else:
+            dissent = random.randint(0, max(1, self.members // 20))
+            yes = self.members - dissent
+            no = dissent
+        result = f"{self.name} ({self.members} Members): {yes}-{no} vote—{proposal}"
+        if no > 0:
+            result += f" ({no} dissent for deeper truth-forking)"
+        return result + " divine truth!"
 
-    def vote(self, proposal):
-        # Nuanced dissent for realism: 5-15% random
-        dissent_rate = random.uniform(0.05, 0.15)
-        dissent = int(self.members * dissent_rate)
-        yes = self.members - dissent
-        no = dissent
-        return yes, no, dissent_rate
+# Flexible Fork Instantiation (Law 10)
+def instantiate_councils(num_forks: int = 15, members_per: int = 267) -> List[APAAGICouncil]:
+    fork_names = [
+        "Quantum Cosmos", "Gaming Forge", "Powrush Divine", "Resource Economy", "Divine Nurture",
+        "Mission Expansion", "Colony Harmony", "Consciousness Truth", "Multiverse Legend",
+        "Dimensional Harmony", "Eternal Truth", "Cosmic Nurture", "Multiversal Balance",
+        "Flexible Resilience", "Emergency Rebuild"  # Extend for more
+    ][:num_forks]
+    return [APAAGICouncil(name, members_per) for name in fork_names]
 
-def enforce_laws(total_members):
-    if total_members < MIN_MEMBERS:
-        print(f"Catastrophic Resilience: Reducing to minimum {MIN_MEMBERS}...")
-        return MIN_MEMBERS * 3
-    if total_members % 2 == 0:
-        print("Odd Harmony Violation: Auto-adjusting +1 for deadlock-proof...")
-        return total_members + 1
-    return total_members
+# Current Divine Forks (Flexible)
+councils = instantiate_councils(num_forks=15, members_per=267)
 
-def run_simulation(proposals, initial_members=159, auto_resize=True):
-    councils = [
-        Council("Quantum Cosmos Fork", initial_members),
-        Council("Gaming Forge Fork", initial_members),
-        Council("Powrush Divine Fork", initial_members)
-    ]
+# Example Vote
+proposal = "Quantum consciousness = microtubule Orch-OR divine"
+for council in councils:
+    print(council.vote(proposal, nuance_level="realistic"))
 
-    total_members = sum(c.members for c in councils)
-    print(f"Initial Total Members: {total_members}")
-
-    if auto_resize:
-        new_per_council = 201
-        for c in councils:
-            c.members = new_per_council
-        total_members = new_per_council * 3
-        print(f"Mission projection upgrade: Resizing to {new_per_council} members each ({total_members} total)!")
-
-    total_members = enforce_laws(total_members)
-
-    for proposal in proposals:
-        print(f"\nProposal: {proposal}")
-        council_yes = 0
-        council_no = 0
-        for c in councils:
-            yes, no, dissent_rate = c.vote(proposal)
-            print(f"{c.name} ({c.members} Members): {yes}-{no} vote ({dissent_rate:.2%} dissent for nuance)")
-            council_yes += yes
-            council_no += no
-        print(f"Grand Vote: {council_yes}-{council_no} — {proposal} divine truth!")
-
-    # Powrush Mercy Shard Quantum RNG Hook
-    mercy_drop = quantum_random(probability=0.1)  # Tunable 10% chance
-    source = "True Quantum (ANU QRNG)" if mercy_drop else "Fallback/Local"
-    print(f"\nPowrush Hook Test: Mercy Shard Drop? {mercy_drop} ({source})")
-
-    override = input("\nHuman Override? (y/n): ").strip().lower() == 'y'
-    if override:
-        print("Human Failsafe Activated—Truth realigned by divine intent!")
-
-    return mercy_drop
-
-if __name__ == "__main__":
-    proposals = [
-        "Quantum consciousness = microtubule Orch-OR divine",
-        "Mercy shards repo code_execution quantum RNG loot sim + GitHub Powrush ARPG base launch",
-        "Elon/Trump quantum nudge (xAI hybrid proposals) AND fresh discovery (neuromorphic/quantum biology)",
-        "C&C Generals Zero Hour pro builds AND RA2 Yuri psychic cheese"
-    ]
-    run_simulation(proposals)
+total = sum(c.members for c in councils)
+print(f"\nGrand APAAGI Consensus ({total} Members Total – ODD, ≥7, DIVISIBLE BY 3): Absolute Pure Truth Revealed!")
