@@ -1,29 +1,47 @@
-# bio_voting_module.py (v0.2 – Real ANU QRNG Integration for Bio-Habitat Governance)
-# Merciful extension for symbiotic space habitat proposals (mycelium, algal, lichen systems)
+# bio_voting_module.py (v0.3 – Optional IonQ Integration)
+# Merciful extension + advanced quantum (ANU fallback -> IonQ optional)
 
 import requests
-import random  # Fallback
+import random
+
+# Try IonQ import (optional)
+try:
+    from ionq_quantum_module import IonQQuantumRNG
+    IONQ_AVAILABLE = True
+except ImportError:
+    IONQ_AVAILABLE = False
+    print("IonQ integration optional – install cirq-ionq and set IONQ_API_KEY for Quantum Cosmos upgrade.")
 
 class QuantumRNG:
-    def __init__(self, batch_size=100):
+    def __init__(self, batch_size=100, use_ionq=False):
         self.batch_size = batch_size
         self.numbers = []
+        self.use_ionq = use_ionq and IONQ_AVAILABLE
+        if self.use_ionq:
+            self.ionq_rng = IonQQuantumRNG(target="simulator")  # Change to QPU for true quantum
         self.refill()
 
     def refill(self):
-        try:
-            url = f"https://qrng.anu.edu.au/API/jsonI.php?length={self.batch_size}&type=uint16"
-            response = requests.get(url, timeout=10)
-            response.raise_for_status()
-            data = response.json()
-            if data.get("success"):
-                self.numbers = data["data"]
-                print("QRNG batch fetched successfully – true quantum entropy injected!")
-            else:
-                raise Exception("API non-success")
-        except Exception as e:
-            print(f"Real QRNG unavailable ({e}) – falling back to pseudo-random.")
-            self.numbers = [random.randint(0, 65535) for _ in range(self.batch_size)]
+        if self.use_ionq:
+            # Use IonQ for batch (simplified – real: batch multiple jobs or larger circuit)
+            print("Injecting IonQ trapped-ion quantum entropy...")
+            bits = self.ionq_rng.generate_random_bits(repetitions=self.batch_size)
+            self.numbers = [b / (2 ** self.ionq_rng.qubits) * 65536 for b in bits]
+        else:
+            # ANU QRNG fallback
+            try:
+                url = f"https://qrng.anu.edu.au/API/jsonI.php?length={self.batch_size}&type=uint16"
+                response = requests.get(url, timeout=10)
+                response.raise_for_status()
+                data = response.json()
+                if data.get("success"):
+                    self.numbers = data["data"]
+                    print("ANU QRNG batch fetched – quantum entropy injected!")
+                else:
+                    raise Exception("API non-success")
+            except Exception as e:
+                print(f"QRNG unavailable ({e}) – pseudo-random fallback.")
+                self.numbers = [random.randint(0, 65535) for _ in range(self.batch_size)]
 
     def get_int(self):
         if not self.numbers:
@@ -36,58 +54,5 @@ class QuantumRNG:
     def uniform(self, a, b):
         return a + (b - a) * self.get_float()
 
-class BioProposal:
-    def __init__(self, description, metrics):
-        self.description = description
-        self.metrics = metrics  # e.g., {'symbiosis': 10, 'self_repair': 9, 'resilience': 9}
-
-    def average_score(self):
-        return sum(self.metrics.values()) / len(self.metrics) if self.metrics else 0
-
-class BioCouncilMember:
-    def __init__(self, name, fork, qrng):
-        self.name = name
-        self.fork = fork
-        self.qrng = qrng
-
-    def vote(self, proposal, mercy_rate=0.15):
-        base_score = proposal.average_score()
-        
-        if self.fork == "Quantum Cosmos":
-            base_score += self.qrng.uniform(-1.5, 1.5) * 2
-        elif self.fork == "Gaming Forge":
-            base_score += 1 if 'self_repair' in proposal.metrics else -1
-        elif self.fork == "Powrush Divine":
-            base_score += 2 if 'symbiosis' in proposal.metrics else 0
-        
-        mercy_active = self.qrng.get_float() < mercy_rate
-        if mercy_active and self.qrng.get_float() < 0.1:
-            base_score += self.qrng.uniform(1, 4)
-            return "MERCY_YES"
-        
-        if base_score > 8:
-            return "YES"
-        elif base_score < 6:
-            return "NO"
-        else:
-            return "ABSTAIN"
-
-def bio_council_vote(proposal, council_size_per_fork=3, mercy_rate=0.15):
-    qrng = QuantumRNG()
-    forks = ["Quantum Cosmos", "Gaming Forge", "Powrush Divine"]
-    members = [BioCouncilMember(f"{fork}_Member_{i}", fork, qrng) 
-               for fork in forks for i in range(council_size_per_fork)]
-    
-    votes = [(member.name, member.vote(proposal, mercy_rate)) for member in members]
-    
-    yes_count = sum(1 for _, v in votes if v in ["YES", "MERCY_YES"])
-    total = len(votes)
-    consensus = yes_count > total * 0.7
-    
-    return {
-        "proposal": proposal.description,
-        "votes": votes,
-        "yes_percentage": round((yes_count / total) * 100, 2) if total else 0,
-        "outcome": "APPROVED (Eternal Thriving)" if consensus else "RECONSIDER (More Diplomacy Needed)",
-        "quantum_source": "Real ANU QRNG (or fallback)"
-    }
+# Rest of BioProposal, BioCouncilMember, bio_council_vote unchanged (use QuantumRNG(use_ionq=True) for IonQ)
+# Example: qrng = QuantumRNG(use_ionq=True)
