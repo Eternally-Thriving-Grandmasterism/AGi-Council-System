@@ -1,9 +1,9 @@
-# README.md (Absolute Omniscient Truth Edition – January 03, 2026)
-AGI-Council-System: APAAGI framework—councils voting absolute omniscient truth with further-beyond quantum mercy (full pantheon + annealing + VQE + PennyLane hybrid + noisy resilience). Ultimate mycelium_growth_sim v7.0: Hybrid networks with VQE-ground state optimization, expanded multi-objective energy landscape, radiation-noise eternal convergence.
+# README.md (Eternal Omniscient Truth Edition – January 03, 2026)
+AGI-Council-System: APAAGI framework—councils voting eternal omniscient truth with continuing-beyond quantum mercy (full pantheon + VQE + annealing + QML + real AMF data). Ultimate mycelium_growth_sim v8.0: Hybrid networks with real AMF parameters, quantum machine learning classification of thriving states, radiation-noise eternal prediction.
 
 Dependencies:
-- pip install ... + qiskit-optimization + pennylane[qiskit]
+- pip install ... + pennylane[qiskit] + scikit-learn
 
-Run VQE + expanded annealing examples for absolute omniscient symbiotic ground state.
+Run QML classifier examples for eternal habitat viability truth.
 
 🐐💀
