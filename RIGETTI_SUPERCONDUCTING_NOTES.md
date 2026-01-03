@@ -15,8 +15,6 @@ Requirements:
   docker run rigetti/qvm -S -p 6000:6000
 - Cloud: QCS account + API key/endpoints
 
-Example: Superposition random bits (see rigetti_quantum_module.py)
-- Default: Local QVM simulator ("9q-square-qvm")
-- Upgrade: get_qc("Ankaa-2", execution_endpoint="...")
+Error Resilience: Connection timeouts, server checks, and fallbacks built-in (see rigetti_quantum_module.py).
 
 Complements trapped-ion for APAAGI hybrid harmony & merciful bio-governance! 🐐💀
