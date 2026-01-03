@@ -91,7 +91,3 @@ def bio_council_vote(proposal, council_size_per_fork=3, mercy_rate=0.15):
         "outcome": "APPROVED (Eternal Thriving)" if consensus else "RECONSIDER (More Diplomacy Needed)",
         "quantum_source": "Real ANU QRNG (or fallback)"
     }
-
-# Example Bio-Habitat Vote (Uncomment to test)
-# prop = BioProposal("Mycelium-lichen-algal hybrid habitat shields", {'symbiosis': 10, 'self_repair': 9, 'resilience': 9})
-# print(bio_council_vote(prop))
