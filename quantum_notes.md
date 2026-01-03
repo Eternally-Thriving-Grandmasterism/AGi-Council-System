@@ -1,7 +1,1 @@
-# quantum_notes.md (Starter Quantum Learning File)
-## Quantum Computing Notes (Jan 2026)
-- Trapped-Ion (IonQ/Quantinuum): High fidelity, all-to-all.
-- Photonic (PsiQuantum): Million-qubit roadmap, light-speed networking.
-- Superconducting (IBM/Google): Scale leaders, error suppression.
-
-Battle-tested for APAAGI quantum truth-forking!
+# quantum_notes.md (Starter Quantum Learning File) ## Quantum Computing Notes (Jan 2026) - Trapped-Ion (IonQ/Quantinuum): High fidelity, all-to-all. - Photonic (PsiQuantum): Million-qubit roadmap, light-speed networking. - Superconducting (IBM/Google): Scale leaders, error suppression. Battle-tested for APAAGI quantum truth-forking! ----------------------------------------------------------------------------------------------------
