@@ -5,4 +5,6 @@ Dependencies (optional for advanced quantum):
 - pip install requests cirq-ionq pyquil rpcq  # For ANU + IonQ + Rigetti integration
 - Run local QVM/quilc servers for Rigetti sim (docker recommended)
 
+Error Resilience: Full graceful degradation—quantum sources fallback automatically with clear diagnostics.
+
 🐐💀
