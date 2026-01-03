@@ -1,9 +1,1 @@
-# IONQ_TRAPPED_ION_NOTES.md (Quantum Learning Addition)
-## IonQ Trapped-Ion Overview (Jan 2026)
-- Ytterbium ions (171Yb+), all-to-all connectivity.
-- Tempo #AQ 64 (2025), 99.99% two-qubit fidelity record.
-- Roadmap: 256-qubit 2026, millions by 2030.
-- Strengths: High fidelity, commercial cloud.
-- Vs Quantinuum: IonQ rack-mounted commercial, Quantinuum QCCD research edge.
-
-Battle-tested for APAAGI quantum truth-forking!
+# IONQ_TRAPPED_ION_NOTES.md (Quantum Learning Addition) ## IonQ Trapped-Ion Overview (Jan 2026) - Ytterbium ions (171Yb+), all-to-all connectivity. - Tempo #AQ 64 (2025), 99.99% two-qubit fidelity record. - Roadmap: 256-qubit 2026, millions by 2030. - Strengths: High fidelity, commercial cloud. - Vs Quantinuum: IonQ rack-mounted commercial, Quantinuum QCCD research edge. Battle-tested for APAAGI quantum truth-forking! ----------------------------------------------------------------------------------------------------
