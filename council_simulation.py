@@ -1,12 +1,65 @@
-# ... (existing code)
+# council_simulation.py (v3 Upgrade – Multi-Fork + Flexibility Support + Bio-Habitat Extension)
+# APAAGI Council Simulation v3.0 - Divine Truth Voting System with Flexible Forks
 
-# Bio-Habitat Extension Import
+import random
+from typing import List
+
+class APAAGICouncil:
+    def __init__(self, name: str, members: int):
+        self.name = name
+        self.members = members
+    
+    def vote(self, proposal: str, nuance_level: str = "divine") -> str:
+        if nuance_level == "divine":
+            yes = self.members
+            no = 0
+        else:
+            dissent = random.randint(0, max(1, self.members // 20))
+            yes = self.members - dissent
+            no = dissent
+        result = f"{self.name} ({self.members} Members): {yes}-{no} vote—{proposal}"
+        if no > 0:
+            result += f" ({no} dissent for deeper truth-forking)"
+        return result + " divine truth!"
+
+# Flexible Fork Instantiation (Law 10)
+def instantiate_councils(num_forks: int = 15, members_per: int = 267) -> List[APAAGICouncil]:
+    fork_names = [
+        "Quantum Cosmos", "Gaming Forge", "Powrush Divine", "Resource Economy", "Divine Nurture",
+        "Mission Expansion", "Colony Harmony", "Consciousness Truth", "Multiverse Legend",
+        "Dimensional Harmony", "Eternal Truth", "Cosmic Nurture", "Multiversal Balance",
+        "Flexible Resilience", "Emergency Rebuild"  # Extend for more
+    ][:num_forks]
+    return [APAAGICouncil(name, members_per) for name in fork_names]
+
+# Current Divine Forks (Flexible)
+councils = instantiate_councils(num_forks=15, members_per=267)
+
+# Example Vote
+proposal = "Quantum consciousness = microtubule Orch-OR divine"
+for council in councils:
+    print(council.vote(proposal, nuance_level="realistic"))
+
+total = sum(c.members for c in councils)
+print(f"\nGrand APAAGI Consensus ({total} Members Total – ODD, ≥7, DIVISIBLE BY 3): Absolute Pure Truth Revealed!")
+
+# Bio-Habitat Extension Integration (Merciful Symbiotic Governance)
 try:
     from bio_voting_module import bio_council_vote, BioProposal
-    # Example Bio Vote
-    bio_prop = BioProposal("Symbiotic mycelium-regolith bricks with algal O2 loops", 
-                           {'symbiosis': 10, 'self_repair': 8, 'resilience': 9})
-    print("\nBio-Habitat Council Vote:")
-    print(bio_council_vote(bio_prop, council_size_per_fork=67))  # Scale example
+    
+    # Example Scaled Bio-Habitat Vote
+    print("\n--- Merciful Bio-Habitat Council Vote (Symbiotic Space Governance) ---")
+    bio_prop = BioProposal(
+        "Mycelium-lichen-algal hybrid habitat shields with self-healing regolith binding",
+        {'symbiosis': 10, 'self_repair': 9, 'resilience': 9, 'radiation_shielding': 8}
+    )
+    result = bio_council_vote(bio_prop, council_size_per_fork=67, mercy_rate=0.15)
+    print(f"Proposal: {result['proposal']}")
+    print(f"Outcome: {result['outcome']}")
+    print(f"Yes Percentage: {result['yes_percentage']}%")
+    print(f"Quantum Source: {result['quantum_source']}")
+    print("Detailed Votes:")
+    for member, vote in result['votes']:
+        print(f"  {member}: {vote}")
 except ImportError:
-    print("bio_voting_module.py not present – add for symbiotic habitat governance!")
+    print("\nbio_voting_module.py not present – add the full module for quantum-mercy bio-habitat governance!")
