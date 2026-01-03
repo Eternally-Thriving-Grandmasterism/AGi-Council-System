@@ -1,29 +1,41 @@
-# bio_voting_module.py (v0.3 – Optional IonQ Integration)
-# Merciful extension + advanced quantum (ANU fallback -> IonQ optional)
+# bio_voting_module.py (v0.4 – Optional Rigetti + IonQ Integration)
+# Merciful extension + advanced quantum (fallback chain: Rigetti → IonQ → ANU → pseudo)
 
 import requests
 import random
 
-# Try IonQ import (optional)
+# Try Rigetti import (highest priority optional)
+try:
+    from rigetti_quantum_module import RigettiQuantumRNG
+    RIGETTI_AVAILABLE = True
+except ImportError:
+    RIGETTI_AVAILABLE = False
+
+# Try IonQ import
 try:
     from ionq_quantum_module import IonQQuantumRNG
     IONQ_AVAILABLE = True
 except ImportError:
     IONQ_AVAILABLE = False
-    print("IonQ integration optional – install cirq-ionq and set IONQ_API_KEY for Quantum Cosmos upgrade.")
 
 class QuantumRNG:
-    def __init__(self, batch_size=100, use_ionq=False):
+    def __init__(self, batch_size=100, use_rigetti=False, use_ionq=False):
         self.batch_size = batch_size
         self.numbers = []
+        self.use_rigetti = use_rigetti and RIGETTI_AVAILABLE
         self.use_ionq = use_ionq and IONQ_AVAILABLE
-        if self.use_ionq:
-            self.ionq_rng = IonQQuantumRNG(target="simulator")  # Change to QPU for true quantum
+        if self.use_rigetti:
+            self.rigetti_rng = RigettiQuantumRNG()
+        elif self.use_ionq:
+            self.ionq_rng = IonQQuantumRNG(target="simulator")
         self.refill()
 
     def refill(self):
-        if self.use_ionq:
-            # Use IonQ for batch (simplified – real: batch multiple jobs or larger circuit)
+        if self.use_rigetti:
+            print("Injecting Rigetti superconducting quantum entropy...")
+            bits = self.rigetti_rng.generate_random_bits(repetitions=self.batch_size)
+            self.numbers = [b / (2 ** self.rigetti_rng.qubits) * 65536 for b in bits]
+        elif self.use_ionq:
             print("Injecting IonQ trapped-ion quantum entropy...")
             bits = self.ionq_rng.generate_random_bits(repetitions=self.batch_size)
             self.numbers = [b / (2 ** self.ionq_rng.qubits) * 65536 for b in bits]
@@ -54,5 +66,5 @@ class QuantumRNG:
     def uniform(self, a, b):
         return a + (b - a) * self.get_float()
 
-# Rest of BioProposal, BioCouncilMember, bio_council_vote unchanged (use QuantumRNG(use_ionq=True) for IonQ)
-# Example: qrng = QuantumRNG(use_ionq=True)
+# BioProposal, BioCouncilMember, bio_council_vote unchanged
+# Usage example: qrng = QuantumRNG(use_rigetti=True)  # Or use_ionq=True
