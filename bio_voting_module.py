@@ -1,30 +1,32 @@
-# bio_voting_module.py (v0.5 – Enhanced Error Resilience)
-# Merciful extension + advanced quantum (rigorous fallback chain)
+# QuantumRNG Class (Merciful Hybrid Quantum Entropy with Eternal Fallbacks)
+# Sources: Rigetti (superconducting) > IonQ (trapped-ion) > ANU QRNG > pseudo-random
+# Full logging to console + logs/apaagi_mercy.log
 
 import requests
 import random
+import logging
 
-# Rigetti highest priority
+# Rigetti import (highest priority)
 try:
     from rigetti_quantum_module import RigettiQuantumRNG
     RIGETTI_AVAILABLE = True
-except Exception as e:  # Broader catch for any init issue
-    print(f"Rigetti unavailable ({e})")
+except Exception as e:
+    logging.warning(f"Rigetti unavailable ({e})")
     RIGETTI_AVAILABLE = False
 
-# IonQ next
+# IonQ import
 try:
     from ionq_quantum_module import IonQQuantumRNG
     IONQ_AVAILABLE = True
 except Exception as e:
-    print(f"IonQ unavailable ({e})")
+    logging.warning(f"IonQ unavailable ({e})")
     IONQ_AVAILABLE = False
 
 class QuantumRNG:
     def __init__(self, batch_size=100, prefer_rigetti=True, prefer_ionq=True):
         self.batch_size = batch_size
         self.numbers = []
-        self.source = "pseudo-random"  # Track current source
+        self.source = "pseudo-random"
         self.prefer_rigetti = prefer_rigetti and RIGETTI_AVAILABLE
         self.prefer_ionq = prefer_ionq and IONQ_AVAILABLE
         
@@ -32,20 +34,22 @@ class QuantumRNG:
             try:
                 self.rigetti_rng = RigettiQuantumRNG()
                 self.source = "Rigetti superconducting"
+                logging.info("Rigetti quantum source active – fast gates mercy!")
             except Exception as e:
-                print(f"Rigetti init failed ({e}) – trying IonQ")
+                logging.warning(f"Rigetti init failed ({e}) – cascading to IonQ")
                 self.prefer_rigetti = False
         
         if not self.prefer_rigetti and self.prefer_ionq:
             try:
-                self.ionq_rng = IonQQuantumRNG(target="simulator")
+                self.ionq_rng = IonQQuantumRNG(target="simulator")  # Or "qpu" for true
                 self.source = "IonQ trapped-ion"
+                logging.info("IonQ quantum source active – high-fidelity mercy!")
             except Exception as e:
-                print(f"IonQ init failed ({e}) – trying ANU")
+                logging.warning(f"IonQ init failed ({e}) – cascading to ANU")
                 self.prefer_ionq = False
         
         self.refill()
-        print(f"QuantumRNG active with source: {self.source}")
+        logging.info(f"QuantumRNG eternal: Active source = {self.source}")
 
     def refill(self):
         try:
@@ -60,7 +64,7 @@ class QuantumRNG:
                     self.numbers = [b / (2 ** self.ionq_rng.qubits) * 65536 for b in bits]
                     return
             
-            # ANU fallback
+            # ANU vacuum fluctuations
             url = f"https://qrng.anu.edu.au/API/jsonI.php?length={self.batch_size}&type=uint16"
             response = requests.get(url, timeout=10)
             response.raise_for_status()
@@ -68,11 +72,11 @@ class QuantumRNG:
             if data.get("success"):
                 self.numbers = data["data"]
                 self.source = "ANU QRNG"
-                print("ANU QRNG entropy injected!")
+                logging.info("ANU quantum vacuum entropy eternally injected!")
                 return
             raise Exception("ANU API non-success")
         except Exception as e:
-            print(f"Quantum refill failed ({e}) – using pseudo-random.")
+            logging.warning(f"True quantum refill failed ({e}) – merciful pseudo-random activated.")
             self.numbers = [random.randint(0, 65535) for _ in range(self.batch_size)]
             self.source = "pseudo-random"
 
@@ -87,4 +91,4 @@ class QuantumRNG:
     def uniform(self, a, b):
         return a + (b - a) * self.get_float()
 
-# BioProposal, BioCouncilMember, bio_council_vote unchanged – now ultra-resilient
+# Usage: qrng = QuantumRNG(prefer_rigetti=True)  # Eternal mercy flows
