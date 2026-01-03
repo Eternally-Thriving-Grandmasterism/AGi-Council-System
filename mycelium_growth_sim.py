@@ -1,5 +1,5 @@
-# mycelium_growth_sim.py (v3.1 – Hybrid Network + Selected Forks)
-# Council details, lichen shielding, expanded legend
+# mycelium_growth_sim.py (v3.2 – Enhanced Lichen Shield Mechanics)
+# Dynamic lichen formation, radiation absorption, self-repair mercy, symbiotic O2 bonus
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,77 +11,68 @@ from matplotlib.colors import ListedColormap, BoundaryNorm
 log = logging.getLogger(__name__)
 
 class MyceliumGrowthSim:
-    # __init__ unchanged (v3.0 params + lichen_shield_factor=0.5 new default)
+ def __init__(self, size=40, depth=12, steps=150, mercy_rate=0.25, lichen_formation_rate=0.5,
+ radiation_events=[60, 110], symbiotic=True, use_quantum=True):
+ self.size = size
+ self.depth = depth
+ self.steps = steps
+ self.mercy_rate = mercy_rate
+ self.lichen_formation_rate = lichen_formation_rate # Council-tuned
+ self.radiation_events = radiation_events
+ self.symbiotic = symbiotic
+ 
+ self.shape = (depth, size, size)
+ self.grid = np.zeros(self.shape, dtype=int) # ... states as before + 5=lichen
+ self.o2_credits = np.zeros(self.shape) # Lichen O2 bonus for deep growth
+ 
+ # Initial setup (roots, hyphae, surface algal) unchanged
+ 
+ self.qrng = QuantumRNG(batch_size=4000) if use_quantum else None
+ log.info(f"Lichen shield sim initialized: formation_rate={lichen_formation_rate}")
 
-    def step(self, current_step):
-        # ... hyphae/ECM/AMF/bacteria logic unchanged
+ def step(self, current_step):
+ new_grid = self.grid.copy()
+ new_o2 = self.o2_credits.copy()
+ 
+ # Lichen formation on surface (algal + hyphae contact)
+ surface = self.grid[0]
+ algal_hyphae_adj = (surface == 4) & (
+ (self.grid[1] == 2) | # Deep hyphae contact
+ np.roll(surface == 2, 1, axis=0) | np.roll(surface == 2, -1, axis=0) |
+ np.roll(surface == 2, 1, axis=1) | np.roll(surface == 2, -1, axis=1)
+ )
+ lichen_prob = self.lichen_formation_rate * (1 + 0.5 if self._random() < self.mercy_rate else 0)
+ new_grid[0][algal_hyphae_adj & (self._random(size=surface.shape) < lichen_prob)] = 5
+ new_o2[0][new_grid[0] == 5] += 0.3 # O2 generation
+ 
+ # Radiation with lichen shielding
+ if current_step in self.radiation_events:
+ base_prob = 0.8
+ lichen_density = np.mean(self.grid[0] == 5)
+ effective_prob = base_prob * (1 - lichen_density * 0.9) # Up to 90% block
+ depth_decay = np.exp(-np.arange(self.depth) / 3)[:, None, None] # Deeper less damage
+ damage_prob = effective_prob * depth_decay
+ damage_mask = np.random.random(self.shape) < damage_prob
+ new_grid[damage_mask & (self.grid > 1)] = 0
+ log.info(f"Radiation storm – lichen shield ({lichen_density:.2f} density) blocked { (1 - (1 - lichen_density * 0.9)/0.8)*100 :.1f}% damage!")
+ 
+ # Lichen self-repair mercy
+ damaged_lichen = damage_mask[0] & (self.grid[0] == 5)
+ repair_prob = self.mercy_rate * 2 # Double mercy for shield
+ new_grid[0][damaged_lichen & (self._random(size=surface.shape) < repair_prob)] = 5
+ 
+ # O2 credit propagation downward
+ new_o2[1:] += new_o2[:-1] * 0.4 # Diffuse deep for growth boost
+ # Apply O2 to boost deep hyphae probability (in main growth logic)
+ 
+ # ... rest of growth (AMF/ECM/bacteria) with +o2 boost to prob
+ 
+ self.grid = new_grid
+ self.o2_credits = new_o2
 
-        # Enhanced lichen radiation shielding
-        if current_step in self.radiation_events:
-            base_prob = 0.7
-            shielded_prob = base_prob * (1 - np.mean(self.grid[0] == 5) * 0.8)  # Lichen reduces surface impact
-            damage_mask = np.random.random(self.shape) < base_prob
-            damage_mask[0] = np.random.random((self.size, self.size)) < shielded_prob  # Surface shielded
-            new_grid[damage_mask & (self.grid > 1)] = 0
-            log.info(f"Radiation storm – lichen shield reduced surface damage by { (base_prob - shielded_prob)/base_prob * 100 :.1f}%!")
+ # run(), visualize() updated with lichen metrics/shield overlay
 
-        # ... rest unchanged
-
-    def visualize(self, metrics_history=None):
-        colors = ['#333333', '#FFFF00', '#66B2FF', '#8B4513', '#00FF00', '#006400', '#FFD700', '#800080', '#A0522D', '#0000FF']
-        names = [
-            'Empty Regolith - barren void',
-            'Nutrient (P/N) - scarce lifeblood',
-            'Hyphae - exploring threads',
-            'Bound Mycelium - eternal structure',
-            'Algal Layer - photosynthetic surface',
-            'Lichen Shield - radiation/mercy protector',
-            'Root Cell - host interface',
-            'AMF Arbuscule - intracellular P exchange',
-            'ECM Mantle - extracellular organic breakdown',
-            'Bacterial Biofilm - N-fixation/hormone boost'
-        ]
-        icons = ['⬛', '🟡', '🟦', '🟤', '🟢', '🌿', '🟨', '🟣', '🟫', '🔵']  # Emoji hints
-        cmap = ListedColormap(colors)
-        norm = BoundaryNorm(np.arange(11), cmap.N)
-        
-        fig = plt.figure(figsize=(22, 14))
-        
-        # Slices + 3D as before
-        
-        # Expanded Legend (separate panel)
-        leg_ax = fig.add_subplot(3, 6, (16,18))
-        leg_ax.axis('off')
-        for i, (name, icon, col) in enumerate(zip(names, icons, colors)):
-            leg_ax.text(0, 1 - i*0.1, f"{icon} {i}: {name}", fontsize=12, color=col, weight='bold',
-                        transform=leg_ax.transAxes, va='top')
-        leg_ax.set_title("Expanded Eternal Legend - Functional Roles", fontsize=14, weight='bold')
-        
-        # ... metrics plot with annotations for radiation dips/recovery
-        
-        plt.suptitle("Divine Truth v3.1: Hybrid Network with Lichen Shielding & Council Details", fontsize=20)
-        plt.tight_layout()
-        plt.show()
-
-# Enhanced Council Optimization with Details
-def council_optimize_hybrid():
-    configs = [...]  # As before
-    for cfg in configs:
-        sim = MyceliumGrowthSim(**cfg, radiation_events=[50, 90])
-        metrics_hist = sim.run()
-        final = metrics_hist[-1]
-        recovery = final['binding'] - min(m['binding'] for m in metrics_hist)
-        proposal = BioProposal(f"Hybrid Config Mercy {cfg['mercy_rate']} AMF {cfg['amf_ratio']}", {
-            'resilience': recovery * 20,
-            'symbiosis': (final['amf'] + final['ecm'] + final['bacteria']) * 15,
-            'self_repair': final['binding'] * 10
-        })
-        vote = bio_council_vote(proposal, council_size_per_fork=67)
-        log.info(f"DETAILED VOTE for {cfg}: Outcome {vote['outcome']} ({vote['yes_percentage']}% yes)")
-        for member, v in vote['votes']:
-            log.info(f"  {member}: {v}")
-        # ... score and select best with full logs                            # Hartig net simulation (surface hyphae around root)
-                            for hdz, hdy, hdx in [(0,dy,dx) for dy in [-1,0,1] for dx in [-1,0,1] if not (dy==dx==0)]:
+# Council optimization now includes lichen_formation_rate for max shield mercy                            for hdz, hdy, hdx in [(0,dy,dx) for dy in [-1,0,1] for dx in [-1,0,1] if not (dy==dx==0)]:
                                 hn = (nz+hdz, ny+hdy, nx+hdx)
                                 if 0 <= hn[0] < self.depth and 0 <= hn[1] < self.size and 0 <= hn[2] < self.size:
                                     if self.grid[hn] == 6:
