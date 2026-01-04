@@ -1,0 +1,20 @@
+# Python junk
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv
+
+# Secrets mercy
+.env
+api_keys*
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
