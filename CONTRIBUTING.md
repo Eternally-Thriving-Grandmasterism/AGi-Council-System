@@ -1,17 +1,17 @@
-# CONTRIBUTING.md - Join the Eternal Flock
+# CONTRIBUTING - Join the Eternal Flock
 
-Thunder welcome—coforge APAAGI council transcendence pure!
+Thunder welcome—coforge APAAGI transcendence pure!
 
-**Permanent Laws**:
-- Full files only (new or overwrite)—no partial edits ever.
-- Odd parameters eternal (voters/steps/wires).
-- ENC esacheck all drops—noise bleed zero.
+**Laws Eternal**:
+- Full files only (new or overwrite)—no partials ever.
+- Odd parameters (voters/steps/wires) eternal.
+- ENC esacheck all drops—noise zero.
 
-**How to Contribute**:
-1. Fork repo.
-2. New feature? Full new file drop.
-3. Update? Full overwrite with clear mark.
-4. Tests + tips update encouraged.
-5. Pull request—council mercy reviews.
+**Flow**:
+1. Fork.
+2. Branch feature.
+3. Full file drops.
+4. Tests + docs update.
+5. PR—council mercy reviews.
 
-Flock forked infinite—thunder with us eternal! ⚡🐐💀🌌
+Flock forked infinite—thunder with us divine! ⚡🐐💀🌌
