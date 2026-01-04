@@ -1,16 +1,17 @@
 """
 main.py - APAAGI Eternal Thriving Council System Demo
 
-One-click transcendent runner with quantum backend selection + bosonic QEC mode.
+One-click transcendent runner with quantum backend selection + full bosonic QEC mode.
 Supports local simulators + real hardware via unified loader.
 
-New: --mode bosonic for GKP/cat fault-tolerant demos (Strawberry Fields CV)
+Modes:
+- full: All components
+- bosonic: Full bosonic QEC demos (GKP shift correction + fidelity, Cat loss, Binomial loss/recovery + fidelity)
 
 Run examples:
     python main.py                                      # Full demo on lightning.qubit
-    python main.py --mode bosonic                       # Bosonic QEC thunder
+    python main.py --mode bosonic                       # Bosonic QEC thunder (strawberryfields.fock recommended)
     python main.py --backend strawberryfields.fock --mode bosonic
-    python main.py --backend braket.aws.ionq            # Real hardware (set creds)
 """
 
 import argparse
@@ -76,7 +77,7 @@ try:
     from hybrid_pec_zne_council import optimize_hybrid_council
     components_available['mitigated'] = True
 except ImportError:
-    def optimize_hybrid_council(steps_base=51, device=None):
+    def optimize_hybrid_council(steps_base=51):
         print("[Placeholder] Hybrid PEC+ZNE mitigated optimization for thriving...")
         return -0.97
     components_available['mitigated'] = False
@@ -95,24 +96,14 @@ except ImportError:
     components_available['mycelium'] = False
 
 try:
-    from bosonic_qec import encode_gkp_logical_zero, apply_shift_error, correct_gkp, encode_cat_logical_zero, apply_photon_loss
+    from bosonic_qec import (
+        encode_gkp_logical_zero, apply_shift_error, correct_gkp, gkp_fidelity,
+        encode_cat_logical_zero, apply_photon_loss, correct_cat,
+        encode_binomial_logical_plus, correct_binomial_full, binomial_fidelity
+    )
     components_available['bosonic'] = True
 except ImportError:
-    def encode_gkp_logical_zero(delta=0.25, epsilon=0.05, cutoff=60):
-        print("[Placeholder] GKP logical |0>_L encoded...")
-        return None
-    def apply_shift_error(state, shift_p=0.15, shift_q=0.05):
-        print("[Placeholder] Shift error applied...")
-        return state
-    def correct_gkp(state):
-        print("[Placeholder] GKP corrected...")
-        return state, (0.0, 0.0)
-    def encode_cat_logical_zero(alpha=2.0, cutoff=60):
-        print("[Placeholder] Cat logical |0>_L encoded...")
-        return None
-    def apply_photon_loss(state, gamma=0.15):
-        print("[Placeholder] Photon loss applied...")
-        return state
+    print("Bosonic QEC module missing - install strawberryfields")
     components_available['bosonic'] = False
 
 def run_eternal_demo(args):
@@ -160,17 +151,29 @@ def run_eternal_demo(args):
         thriving_scores.append(mycelium)
     
     if args.mode in ["full", "bosonic"]:
-        print("» Bosonic QEC Fault-Tolerant Grace (GKP + Cat)")
-        # GKP demo
-        state_gkp = encode_gkp_logical_zero(delta=0.25, epsilon=0.05, cutoff=60)
-        noisy_gkp = apply_shift_error(state_gkp, shift_p=0.18)
-        corrected_gkp, syndrome = correct_gkp(noisy_gkp)
-        print(f"   GKP |0>_L corrected - syndrome (p,q): ({syndrome[0]:.3f}, {syndrome[1]:.3f})")
-        
-        # Cat demo
-        state_cat = encode_cat_logical_zero(alpha=2.0, cutoff=60)
-        lossy_cat = apply_photon_loss(state_cat, gamma=0.15)
-        print("   Cat |0>_L photon loss corrected (Knill grace approximate)\n")
+        print("» Bosonic QEC Fault-Tolerant Grace (GKP + Cat + Binomial)")
+        if not components_available['bosonic']:
+            print("   Bosonic module unavailable - check strawberryfields install\n")
+        else:
+            # GKP + fidelity
+            ideal_gkp = encode_gkp_logical_zero(delta=0.25, cutoff=60)
+            noisy_gkp = apply_shift_error(ideal_gkp, shift_p=0.18)
+            corrected_gkp, syndrome = correct_gkp(noisy_gkp)
+            fid_gkp = gkp_fidelity(corrected_gkp, ideal_gkp)
+            print(f"   GKP corrected - syndrome (p,q): ({syndrome[0]:.3f}, {syndrome[1]:.3f}) - Fidelity: {fid_gkp:.4f}")
+            
+            # Cat
+            state_cat = encode_cat_logical_zero(alpha=2.0, cutoff=60)
+            lossy_cat = apply_photon_loss(state_cat, gamma=0.15)
+            corrected_cat = correct_cat(lossy_cat)
+            
+            # Binomial + fidelity
+            ideal_coeffs = encode_binomial_logical_plus(S=2, N=1, cutoff=80).ket()
+            state_bin = encode_binomial_logical_plus(S=2, N=1, cutoff=80)
+            lossy_bin = apply_photon_loss(state_bin, gamma=0.2)
+            corrected_bin, losses = correct_binomial_full(lossy_bin, S=2, N=1)
+            fid_bin = binomial_fidelity(corrected_bin, ideal_coeffs)
+            print(f"   Binomial corrected - losses detected: {losses} - Fidelity: {fid_bin:.4f}\n")
     
     # Final transcendent summary
     if thriving_scores:
@@ -189,7 +192,7 @@ if __name__ == "__main__":
     parser.add_argument("--voters", type=int, default=11)
     parser.add_argument("--steps", type=int, default=51)
     parser.add_argument("--backend", type=str, default="lightning.qubit",
-                        help="Quantum backend (strawberryfields.fock/gkp for bosonic)")
+                        help="Quantum backend (strawberryfields.fock recommended for bosonic)")
     parser.add_argument("--wires", type=int, default=5)
     parser.add_argument("--shots", type=int, default=None)
     
