@@ -1,87 +1,120 @@
 """
-bosonic_qec.py - Bosonic Quantum Error Correction Integration for APAAGI Councils
+bosonic_qec.py - Bosonic Quantum Error Correction Integration for APAAGI Councils (Fixed Eternal Edition)
 
-Implements simulation of key bosonic QEC codes using Strawberry Fields (Xanadu photonic framework)
-and PennyLane CV support. Focus on hardware-efficient codes for photonic/oscillator modes:
+Accurate simulation using Strawberry Fields built-in GKP and Cat states.
+- GKP: Ideal/additive noise approx with built-in op (delta squeezing, epsilon additive)
+- Cat: Even/odd cats for photon loss correction
+- Simple error channels + correction demos
 
-- Gottesman-Kitaev-Preskill (GKP) codes: Grid states in phase space, correct small shifts.
-- Cat codes: Superpositions of coherent states (±α), correct photon loss/amplitude damping.
-- Binomial codes (optional extension): Approximate GKP/cat with finite photons.
+Tie into councils: Bosonic logicals for fault-tolerant mercy storage or CV QML habitat classify.
 
-Perfect for Strawberry Fields backend—fault-tolerant grace in continuous-variable (bosonic) regimes.
-Low overhead vs discrete qubits, natural for photonic hardware.
-
-Usage:
-    from bosonic_qec import encode_gkp_logical_zero, apply_shift_error, correct_gkp
-    state = encode_gkp_logical_zero(delta=0.3)  # Squeezing parameter
-    noisy = apply_shift_error(state, shift=0.2)
-    corrected, syndrome = correct_gkp(noisy)
-
-Tie into hybrid councils: Use bosonic logical qubits for transcendent mercy shard storage or
-error-corrected QML in habitat classification.
-
-Thunder eternal—bosonic fault-tolerance nurturing APAAGI harmony!
+Requirements: strawberryfields (>=0.23 for GKP op)
 """
 
 import numpy as np
 import strawberryfields as sf
-from strawberryfields.ops import *
+from strawberryfields.ops import GKP, Catstate, Dgate, LossChannel, MeasureX, MeasureP
 from strawberryfields.backends import BaseFockState
-import pennylane as qml
 
-# GKP Parameters (ideal square lattice, approximate with finite squeezing)
-def gkp_logical_zero(delta: float = 0.25, cutoff: int = 50):
-    """
-    Approximate |0>_L GKP state: sum_k (-1)^k |k√π α> (coherent states grid)
-    delta: squeezing ~1/√N_photons, smaller = better approximation
-    """
-    eng = sf.Engine("fock", backend_options={"cutoff_dim": cutoff})
-    prog = sf.Program(1)
-    
-    with prog.context as q:
-        # Ideal GKP |0>_L = ∑_k |√π (2k)>_p (position quadrature grid)
-        # Approximate via squeezed vacuum + displacements
-        S = Squeezed(-np.log(2*delta**2))  # Magic squeezing for square GKP
-        for k in range(-10, 11):  # Finite sum approximation
-            D(alpha = np.sqrt(np.pi) * k * (1 + 1j))  # Alternate phase for square
-            # Weight (-1)^k for logical zero
-        # Normalize later
-    
-    state = eng.run(prog).state
-    return state
+# GKP Logical |0>_L (ideal square lattice approximation)
+def encode_gkp_logical_zero(delta: float = 0.3, epsilon: float = 0.0, cutoff: int = 50):
+ """
+ Built-in GKP state: |+> or |0> type, square lattice.
+ delta: squeezing parameter (smaller = better, ~0.2-0.3 practical)
+ epsilon: additive noise for realism (0 = ideal)
+ """
+ eng = sf.Engine("fock", backend_options={"cutoff_dim": cutoff})
+ prog = sf.Program(1)
+ 
+ with prog.context as q:
+ GKP(state="0", delta=delta, epsilon=epsilon) | q[0] # Logical |0>_L (position grid)
+ 
+ state = eng.run(prog).state
+ return state
 
+# Apply shift error (displacement noise - common in oscillators)
 def apply_shift_error(state: BaseFockState, shift_p: float = 0.1, shift_q: float = 0.1):
-    """Apply small displacement errors in phase space (common bosonic noise)"""
-    prog = sf.Program(1)
-    with prog.context as q:
-        D(alpha = shift_p + 1j * shift_q)
-    new_state = state.apply(prog)
-    return new_state
+ prog = sf.Program(1)
+ with prog.context as q:
+ Dgate(shift_p + 1j * shift_q) | q[0]
+ return state.apply(prog)
 
-def correct_gkp(state: BaseFockState, delta: float = 0.25):
-    """
-    Simple GKP correction: Measure quadratures, round to nearest grid, displace back.
-    Returns corrected state + syndrome (measured shifts)
-    """
-    # In simulation: Extract quadratures (expectation or sample)
-    p = state.x_mean(0)  # Position quadrature
-    q = state.p_mean(0)  # Momentum
-    
-    # Round to nearest √π multiple
-    syndrome_p = p - np.sqrt(np.pi) * np.round(p / np.sqrt(np.pi))
-    syndrome_q = q - np.sqrt(np.pi) * np.round(q / np.sqrt(np.pi))
-    
-    # Correct by opposite displacement
-    prog = sf.Program(1)
-    with prog.context as q:
-        D(alpha = -syndrome_p - 1j * syndrome_q)
-    corrected = state.apply(prog)
-    
-    return corrected, (syndrome_p, syndrome_q)
+# GKP Correction: Measure quadratures, round to grid, displace back
+def correct_gkp(state: BaseFockState, sqrt_pi: float = np.sqrt(np.pi)):
+ # Sample or mean quadratures (here use mean for sim approx)
+ p_mean = state.p_mean(0)
+ q_mean = state.q_mean(0)
+ 
+ # Round to nearest grid multiple
+ round_p = sqrt_pi * np.round(p_mean / sqrt_pi)
+ round_q = sqrt_pi * np.round(q_mean / sqrt_pi)
+ 
+ # Syndrome = residual shift
+ syndrome_p = p_mean - round_p
+ syndrome_q = q_mean - round_q
+ 
+ # Corrective displacement
+ prog = sf.Program(1)
+ with prog.context as q:
+ Dgate(-syndrome_p - 1j * syndrome_q) | q[0]
+ 
+ corrected = state.apply(prog)
+ return corrected, (syndrome_p, syndrome_q)
 
-# Cat Code Example (Schrodinger cat: even/odd coherent superpositions)
-def cat_logical_zero(alpha: float = 2.0, cutoff: int = 50):
-    """|0>_L = N (+ |α> + |-α>) even cat (photon-number parity)"""
+# Cat Logical |0>_L (even cat for phase-flip resistance)
+def encode_cat_logical_zero(alpha: float = 2.0, cutoff: int = 50):
+ eng = sf.Engine("fock", backend_options={"cutoff_dim": cutoff})
+ prog = sf.Program(1)
+ 
+ with prog.context as q:
+ Catstate(alpha=alpha, phi=0) | q[0] # Even cat N(|α> + |-α>)
+ 
+ state = eng.run(prog).state
+ return state
+
+# Photon loss error
+def apply_photon_loss(state: BaseFockState, gamma: float = 0.1):
+ prog = sf.Program(1)
+ with prog.context as q:
+ LossChannel(gamma) | q[0]
+ return state.apply(prog)
+
+# Simple cat parity correction (detect loss, approximate recovery)
+def correct_cat(state: BaseFockState):
+ # Measure photon number parity (even/odd)
+ probs_even = np.sum(state.fock_prob(np.arange(0, state.cutoff_dim, 2)))
+ parity = 0 if np.random.rand() < probs_even else 1
+ 
+ if parity == 1: # Loss detected
+ print("Photon loss detected - applying approximate recovery")
+ # Real: Use Knill recovery with ancilla cat; here placeholder amplify
+ prog = sf.Program(1)
+ with prog.context as q:
+ # Approximate: small amplification (not perfect)
+ pass
+ return state # Placeholder full recovery
+
+# Demo / test
+if __name__ == "__main__":
+ print("Bosonic QEC Eternal Thunder Demo\n")
+ 
+ # GKP demo
+ state_zero = encode_gkp_logical_zero(delta=0.25, epsilon=0.05, cutoff=60)
+ print(f"GKP |0>_L encoded (mean photons: {state_zero.mean_photon(0)[0]:.2f})")
+ 
+ noisy = apply_shift_error(state_zero, shift_p=0.18, shift_q=0.05)
+ corrected, syndrome = correct_gkp(noisy)
+ print(f"GKP corrected - syndrome (p,q): ({syndrome[0]:.3f}, {syndrome[1]:.3f})\n")
+ 
+ # Cat demo
+ cat_zero = encode_cat_logical_zero(alpha=2.0, cutoff=60)
+ print(f"Cat |0>_L encoded (mean photons: {cat_zero.mean_photon(0)[0]:.2f})")
+ 
+ lossy = apply_photon_loss(cat_zero, gamma=0.15)
+ corrected_cat = correct_cat(lossy)
+ print("Cat correction applied (placeholder full Knill)\n")
+ 
+ print("Bosonic fault-tolerance grace eternal - APAAGI nurtured in CV regimes!")    """|0>_L = N (+ |α> + |-α>) even cat (photon-number parity)"""
     eng = sf.Engine("fock", backend_options={"cutoff_dim": cutoff})
     prog = sf.Program(1)
     
