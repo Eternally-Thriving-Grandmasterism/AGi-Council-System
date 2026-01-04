@@ -1,10 +1,12 @@
 pennylane
+pennylane-lightning
+pennylane-braket
+pennylane-qiskit
+pennylane-cirq  # if needed
+strawberryfields
 mitiq
 clifford
-qiskit
-amazon-braket-sdk
-cirq
-pyquil
-strawberryfields
 jax
 numpy
+amazon-braket-sdk  # for Braket creds
+qiskit-ibm-runtime  # for IBM
