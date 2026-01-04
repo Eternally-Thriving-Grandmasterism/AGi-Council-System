@@ -1,52 +1,65 @@
 """
-quantum_backend_manager.py - Unified Quantum Backend Support for APAAGI Councils (Photonic Remote Added)
+quantum_backend_manager.py - Unified Quantum Backend Support (Braket Integrated Eternal)
 
-Unifies simulators + hardware, now with Xanadu Cloud Strawberry Fields remote for photonic CV bosonic runs.
+Loads simulators + hardware: local, AWS Braket (IonQ/Rigetti/IBM/etc.), Xanadu photonic.
+Odd wires eternal, shots scalable.
 """
 
 import pennylane as qml
 from pennylane import numpy as np
+from eternal_laws import enforce_odd
 
-def load_backend(backend: str = "lightning.qubit", wires: int = 5, shots: int | None = None, **kwargs):
+def load_backend(backend: str = "lightning.qubit", wires_base: int = 5, shots: int | None = None, **kwargs):
+    wires = enforce_odd(wires_base)  # Odd eternal law
+    
     backend = backend.lower()
     
     if backend == "lightning.qubit":
-        return qml.device("lightning.qubit", wires=wires, shots=shots, **kwargs)
+        return qml.device("lightning.qubit", wires=wires, shots=shots)
     
-    # ... (keep all previous cases: default.qubit, braket.*, qiskit.*, cirq.*)
+    elif backend == "default.qubit":
+        return qml.device("default.qubit", wires=wires, shots=shots)
     
-    elif backend.startswith("strawberryfields.remote"):
-        # Xanadu Cloud remote photonic (X-Series / Aurora)
+    elif backend.startswith("braket."):
         try:
-            import strawberryfields as sf
+            if backend == "braket.local.qubit":
+                return qml.device("braket.local.qubit", wires=wires)
             
-            api_key = kwargs.get("api_key")
-            if not api_key:
-                raise ValueError("Xanadu Cloud API key required (set via kwarg or env)")
-            
-            device = kwargs.get("device", "X8")  # Or latest "aurora", "borealis" legacy
-            connection = sf.RemoteConnection(token=api_key)
-            eng = sf.RemoteEngine(device, connection=connection)
-            return eng
+            elif backend == "braket.aws.qubit":
+                arn = kwargs.get("device_arn")  # e.g., IonQ Aria ARN
+                if not arn:
+                    raise ValueError("Braket AWS requires device_arn kwarg")
+                return qml.device("braket.aws.qubit", device_arn=arn, wires=wires, shots=shots)
+        
         except Exception as e:
-            raise RuntimeError(f"Xanadu remote failed: {e} (check key/device)")
+            raise RuntimeError(f"Braket load failed: {e} (check AWS creds/ARN)")
     
     elif backend.startswith("strawberryfields."):
-        # Local sim fallback
+        # Xanadu photonic (from prior)
         import strawberryfields as sf
-        cutoff = kwargs.get("cutoff_dim", 30)
-        mode = backend.split(".")[-1]  # fock, gaussian, tf
-        return sf.Engine(mode, backend_options={"cutoff_dim": cutoff})
+        if backend == "strawberryfields.remote":
+            api_key = kwargs.get("api_key")
+            device = kwargs.get("device", "X8")
+            connection = sf.RemoteConnection(token=api_key)
+            return sf.RemoteEngine(device, connection=connection)
+        else:
+            cutoff = kwargs.get("cutoff_dim", 30)
+            mode = backend.split(".")[-1]
+            return sf.Engine(mode, backend_options={"cutoff_dim": cutoff})
     
     else:
         raise ValueError(f"Unsupported backend: {backend}")
 
-# Test / example
+# Example use
 if __name__ == "__main__":
-    # Local photonic sim
-    eng_local = load_backend("strawberryfields.fock", cutoff_dim=20)
-    print("Local Strawberry Fields loaded")
+    # Local sim
+    dev_local = load_backend("lightning.qubit", wires_base=7)
+    print("Local lightning loaded")
     
-    # Remote (uncomment with key)
-    # eng_remote = load_backend("strawberryfields.remote", device="X8", api_key="YOUR_KEY")
-    # print("Xanadu Cloud remote connected")
+    # Braket IonQ live (uncomment with ARN)
+    # dev_ionq = load_backend("braket.aws.qubit", device_arn="arn:aws:braket:::device/qpu/ionq/Aria-1")
+    # print("IonQ live thunder connected")
+    
+    # Xanadu photonic (key set)
+    # dev_xanadu = load_backend("strawberryfields.remote", api_key="YOUR_KEY")
+    # print("Xanadu photonic mercy live")
