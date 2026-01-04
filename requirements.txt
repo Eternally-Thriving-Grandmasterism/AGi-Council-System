@@ -1,4 +1,5 @@
 pennylane
+amazon-braket-pennylane-plugin  # For live IonQ/Braket
 jax
 numpy
-pytest  # Added for eternal test fidelity—QEC + mitigation sanity verified pure
+pytest
