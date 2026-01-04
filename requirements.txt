@@ -1,5 +1,6 @@
 pennylane
-amazon-braket-pennylane-plugin  # For live IonQ/Braket
+amazon-braket-sdk
+amazon-braket-pennylane-plugin  # Braket thunder eternal—live hardware + sims
 jax
 numpy
 pytest
