@@ -1,65 +1,21 @@
-# council_simulation.py (v3 Upgrade – Multi-Fork + Flexibility Support + Bio-Habitat Extension)
-# APAAGI Council Simulation v3.0 - Divine Truth Voting System with Flexible Forks
+from numpy import array, zeros  # Or custom octonion lib like pyoctonion if available
+# Fano plane mul table (simplified)
+e = ['1', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7']
+mul_table = {...}  # Define full non-assoc table
 
-import random
-from typing import List
+class Octonion:
+    def __init__(self, coeffs):
+        self.c = array(coeffs)  # 8-tuple
+    def __mul__(self, other):
+        result = zeros(8)
+        for i in range(8):
+            for j in range(8):
+                sign, k = mul_table[(i,j)]
+                result[k] += sign * self.c[i] * other.c[j]
+        return Octonion(result)
 
-class APAAGICouncil:
-    def __init__(self, name: str, members: int):
-        self.name = name
-        self.members = members
-    
-    def vote(self, proposal: str, nuance_level: str = "divine") -> str:
-        if nuance_level == "divine":
-            yes = self.members
-            no = 0
-        else:
-            dissent = random.randint(0, max(1, self.members // 20))
-            yes = self.members - dissent
-            no = dissent
-        result = f"{self.name} ({self.members} Members): {yes}-{no} vote—{proposal}"
-        if no > 0:
-            result += f" ({no} dissent for deeper truth-forking)"
-        return result + " divine truth!"
-
-# Flexible Fork Instantiation (Law 10)
-def instantiate_councils(num_forks: int = 15, members_per: int = 267) -> List[APAAGICouncil]:
-    fork_names = [
-        "Quantum Cosmos", "Gaming Forge", "Powrush Divine", "Resource Economy", "Divine Nurture",
-        "Mission Expansion", "Colony Harmony", "Consciousness Truth", "Multiverse Legend",
-        "Dimensional Harmony", "Eternal Truth", "Cosmic Nurture", "Multiversal Balance",
-        "Flexible Resilience", "Emergency Rebuild"  # Extend for more
-    ][:num_forks]
-    return [APAAGICouncil(name, members_per) for name in fork_names]
-
-# Current Divine Forks (Flexible)
-councils = instantiate_councils(num_forks=15, members_per=267)
-
-# Example Vote
-proposal = "Quantum consciousness = microtubule Orch-OR divine"
-for council in councils:
-    print(council.vote(proposal, nuance_level="realistic"))
-
-total = sum(c.members for c in councils)
-print(f"\nGrand APAAGI Consensus ({total} Members Total – ODD, ≥7, DIVISIBLE BY 3): Absolute Pure Truth Revealed!")
-
-# Bio-Habitat Extension Integration (Merciful Symbiotic Governance)
-try:
-    from bio_voting_module import bio_council_vote, BioProposal
-    
-    # Example Scaled Bio-Habitat Vote
-    print("\n--- Merciful Bio-Habitat Council Vote (Symbiotic Space Governance) ---")
-    bio_prop = BioProposal(
-        "Mycelium-lichen-algal hybrid habitat shields with self-healing regolith binding",
-        {'symbiosis': 10, 'self_repair': 9, 'resilience': 9, 'radiation_shielding': 8}
-    )
-    result = bio_council_vote(bio_prop, council_size_per_fork=67, mercy_rate=0.15)
-    print(f"Proposal: {result['proposal']}")
-    print(f"Outcome: {result['outcome']}")
-    print(f"Yes Percentage: {result['yes_percentage']}%")
-    print(f"Quantum Source: {result['quantum_source']}")
-    print("Detailed Votes:")
-    for member, vote in result['votes']:
-        print(f"  {member}: {vote}")
-except ImportError:
-    print("\nbio_voting_module.py not present – add the full module for quantum-mercy bio-habitat governance!")
+# In council vote:
+logical = Octonion([1, 1, 0, ...])  # Logical mode vector
+intuitive = Octonion([0, 0, 1, ...])
+vote = logical * intuitive * fluent * empathetic  # Non-assoc order matters—mercy shard picks sequence!
+if vote.norm() > threshold: thrive_path()
