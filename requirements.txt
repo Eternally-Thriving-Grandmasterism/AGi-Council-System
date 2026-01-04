@@ -1,12 +1,26 @@
+# requirements.txt - APAAGI Council System Dependencies
+
+# Core quantum frameworks
 pennylane
-pennylane-lightning
-pennylane-braket
-pennylane-qiskit
-pennylane-cirq  # if needed
-strawberryfields
-mitiq
-clifford
-jax
+pennylane-lightning  # Fast simulator (GPU/CPU acceleration)
+pennylane-braket     # AWS Braket support (IonQ, Rigetti, etc.)
+pennylane-qiskit     # IBM Quantum support
+pennylane-cirq       # Google Cirq (optional, if needed)
+strawberryfields     # Xanadu photonic / Gaussian boson sampling
+
+# Error mitigation
+mitiq                # PEC, ZNE, etc.
+
+# Geometric / hypercomplex
+clifford             # Geometric Algebra (Clifford algebras)
+
+# Optimization / ML
+jax                  # Differentiable programming (PennyLane interface)
 numpy
-amazon-braket-sdk  # for Braket creds
-qiskit-ibm-runtime  # for IBM
+
+# Cloud provider SDKs (for hardware access)
+amazon-braket-sdk    # AWS Braket credentials / device management
+qiskit-ibm-runtime   # IBM Quantum runtime / credentials
+
+# Install command:
+# pip install -r requirements.txt
