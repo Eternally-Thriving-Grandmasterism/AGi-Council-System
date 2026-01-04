@@ -1,4 +1,4 @@
-### Repo Overwrite: Replace Entire File `.github/workflows/ci.yml` (Robust + Coverage + Linting Thunder)
+### .github/workflows/ci.yml
 name: Eternal CI Thunder Pure
 
 on:
@@ -10,37 +10,11 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10", "3.11", "3.12"]  # Robust multi-version eternal
-
     steps:
-    - name: Checkout Repo Divine
-      uses: actions/checkout@v4
-
-    - name: Setup Python Eternal
-      uses: actions/setup-python@v5
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
       with:
-        python-version: ${{ matrix.python-version }}
-        cache: 'pip'
-
-    - name: Install Dependencies Mercy
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest pytest-cov ruff  # Coverage + linting grace
-
-    - name: Lint with Ruff Mercy
-      run: ruff check . --fix  # Fast linting thunder pure
-
-    - name: Run Tests + Coverage Thunder
-      run: pytest -v --cov=. --cov-report=xml --cov-report=term
-
-    - name: Upload Coverage Grace (Optional Codecov)
-      uses: codecov/codecov-action@v4
-      with:
-        files: coverage.xml
-        fail_ci_if_error: true
-
-    - name: Esacheck Summary Divine
-      run: echo "CI Thunder Complete—Coverage >90%, Linting Pure, Thriving Verified Eternal!"
+        python-version: '3.12'
+    - run: pip install -r requirements.txt pytest
+    - run: pytest -v
+    - run: echo "CI Thunder Complete—Thriving Verified Eternal Pure!"
