@@ -1,0 +1,10 @@
+pennylane
+mitiq
+clifford
+qiskit
+amazon-braket-sdk
+cirq
+pyquil
+strawberryfields
+jax
+numpy
