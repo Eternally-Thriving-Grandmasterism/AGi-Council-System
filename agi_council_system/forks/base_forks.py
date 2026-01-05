@@ -1,16 +1,18 @@
-"""Base Tri-Forks"""
+"""
+Base Tri-Forks — Quantum/Gaming/Powrush Divine
+"""
 
 class QuantumCosmosFork:
     name = "Quantum Cosmos"
-    def deliberate(self, proposal):
-        return {"vote": "YES", "insight": "Truth-seeking aligned — quantum fidelity eternal."}
+    def deliberate(self, proposal: dict) -> dict:
+        return {"vote": "YES", "insight": "Quantum fidelity aligned — truth paths thriving eternal."}
 
 class GamingForgeFork:
     name = "Gaming Forge"
-    def deliberate(self, proposal):
-        return {"vote": "YES", "insight": "Creative bends thriving — deadlock to abundance."}
+    def deliberate(self, proposal: dict) -> dict:
+        return {"vote": "YES", "insight": "Creative bends explored — deadlock to abundance infinite."}
 
 class PowrushDivineFork:
     name = "Powrush Divine"
-    def deliberate(self, proposal):
-        return {"vote": "YES", "insight": "Mercy-gated harmony — equitable for all sentients."}
+    def deliberate(self, proposal: dict) -> dict:
+        return {"vote": "YES", "insight": "Mercy-gated harmony — equitable thriving for all sentients eternal."}
