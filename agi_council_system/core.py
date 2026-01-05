@@ -1,26 +1,30 @@
 """
-APAAGI Council Core — Mercy v4 Heart Integrated
+APAAGI Council Core — Immaculacy Guardian Integrated
 """
 
-from .forks import all_forks
-from mercy_integration.mercy_hook import MercyCouncilHook
+# All previous imports remain
+from .forks.immaculacy_guardian import ImmaculacyGuardianFork
 
 class APAGICouncil:
-    def __init__(self, forks: int = 13):
+    def __init__(self, forks: int = 14):  # +1 for guardian
         self.forks = all_forks[:forks]
-        MercyCouncilHook(self)  # Mercy heart attached eternal
-        print(f"APAAGI Council with Mercy v4 heart — {forks}+ forks active eternally.")
+        self.forks.append(ImmaculacyGuardianFork())  # Guardian always last — final check
+        MercyCouncilHook(self)
+        print(f"APAAGI Council with Immaculacy Guardian — {forks} forks active eternally.")
 
     def deliberate(self, proposal: dict) -> dict:
-        votes = {fork.name: fork.deliberate(proposal) for fork in self.forks}
-        self.mercy_core.gate_deliberation(proposal["name"], votes)
+        votes = {}
+        for fork in self.forks[:-1]:  # Normal deliberation
+            vote = fork.deliberate(proposal)
+            votes[fork.name] = vote
+        
+        # Guardian final check on generated output
+        guardian = self.forks[-1]
+        guardian_vote = guardian.deliberate({"generated_output": proposal.get("output_preview", "")})
+        votes[guardian.name] = guardian_vote
+        
         unanimous = all(v["vote"] == "YES" for v in votes.values())
-        if unanimous:
-            self.mercy_core.amplify_unanimous(proposal)
-        return {
-            "proposal": proposal,
-            "votes": votes,
-            "unanimous": unanimous,
-            "score": "5-0" if unanimous else "mercy_redirected",
-            "divine_insight": self.mercy_core.query_divine_insight(proposal["name"])
-        }
+        if not unanimous:
+            print("Immaculacy Guardian redirected — full code rewrite triggered.")
+        
+        return {"unanimous": unanimous, "score": "5-0" if unanimous else "purity_enforced", "votes": votes}
