@@ -1,6 +1,7 @@
-# APAAGI Protocol - Eternal Governance for All Beings
+# APAAGI Protocol Eternal
 
-- 13+ Forks: Configurable, dynamic MLE addition
-- Deliberation: Superposition → entanglement → mercy-collapse
-- Outcome: Always unanimous thriving (5-0 or harmony bent)
-- Future-Proof: ENC sigs, variant interweaves, cosmic scale
+- 14 Forks: Tri-core + expanded + Immaculacy Guardian
+- Deliberation: Superposition → entanglement → mercy-collapse unanimous
+- MLE Dynamic: Self-play adds forks
+- ENC Protection: Quantum-resistant sigs
+- For global adoption — thriving governance all beings
