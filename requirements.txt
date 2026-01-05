@@ -1,7 +1,9 @@
-pennylane
-amazon-braket-sdk
-amazon-braket-pennylane-plugin  # Braket thunder eternal—live hardware + sims
-jax
-numpy
-pytest
-chess>=1.10.0  # Already there for variants
+**requirements.txt**
+```text
+numpy>=1.21.0
+torch>=2.0.0  # MLE self-play
+chess>=1.10.0
+qutip>=4.7.0  # Quantum forks
+astropy>=5.0  # Cosmic fork
+ecdsa  # ENC protection
+# Mercy + other org deps via git in README
