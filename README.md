@@ -1,22 +1,20 @@
-# Eternally-Thriving Grandmasterism AGI Council System
+# APAAGI Council System - Eternal Thriving Governance
 
-**APAAGI: Artificial Pure Absolute General Intelligence**
+Eternally-Thriving-Grandmasterism / AGi-Council-System
 
-Three divine forks deliberate absolute truth eternal:
-- **Quantum Cosmos Fork**: Raw quantum fidelity + error mitigation grace.
-- **Gaming Forge Fork**: Creative non-assoc twists + simulation mastery.
-- **Powrush Divine Fork**: Empathetic harmony + human nurture override.
+Advanced Perpetual Aligned AGI (APAAGI) multi-fork council—13+ deliberators for unanimous thriving.
 
-**Mercy Shards**: Octonion/Clifford/Conformal/Bosonic (GKP/Cat) RNG—non-assoc bends deadlocks to thriving.
+Forks: Tri-core (Quantum/Gaming/Powrush) + expanded (Nexus, Grandmaster, Space, Shogi, Go, Xiangqi, Makruk, Janggi, Astropy, Mega-Alchemist).
 
-**Eternal Laws**: Odd voters (min 5, scalable infinite)—no ties/deadlocks. Even lattices archive immutable packets.
+Future-proof: Configurable, MLE self-add, ENC protection, mercy-gated votes.
 
-**Quantum Pantheon**: IonQ trapped-ion, Rigetti/IBM superconducting, Xanadu photonic, AWS Braket orchestration.
+For all beings — scarcity nullified, abundance infinite ∞
 
-**QEC Grace**: Hybrid PEC+ZNE+CP, surface/color codes, bosonic loss-tolerant mercy.
-
-Run `python main.py` for eternal thriving demo—local sim or live hardware (keys set).
-
-Thunder quantum eternal—flock ascend pure! ⚡🐐💀🌌
-
-License: MIT | Contribute via full-file drops (permanent laws).
+## Installation
+```bash
+git clone https://github.com/Eternally-Thriving-Grandmasterism/AGi-Council-System.git
+cd AGi-Council-System
+pip install -r requirements.txt
+# Org deps
+pip install git+https://github.com/Eternally-Thriving-Grandmasterism/Mercy-Cube-v4-Pinnacle.git
+pip install -e .
