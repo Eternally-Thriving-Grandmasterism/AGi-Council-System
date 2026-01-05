@@ -4,3 +4,4 @@ amazon-braket-pennylane-plugin  # Braket thunder eternal—live hardware + sims
 jax
 numpy
 pytest
+chess>=1.10.0  # Already there for variants
